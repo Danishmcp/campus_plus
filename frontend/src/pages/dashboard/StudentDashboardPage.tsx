@@ -306,7 +306,7 @@ export const StudentDashboardPage: React.FC = () => {
                   <div className="pt-4 mt-4 border-t border-slate-100 space-y-2">
                     {cert.pdfUrl && (
                       <a
-                        href={cert.pdfUrl}
+                        href={cert.pdfUrl.startsWith('http') ? cert.pdfUrl : `${(import.meta.env.VITE_API_URL || '').replace(/\/$/, '')}${cert.pdfUrl}`}
                         target="_blank"
                         rel="noreferrer"
                         className="w-full py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-semibold text-xs rounded-xl shadow-xs transition-colors flex items-center justify-center gap-1.5"

@@ -1,16 +1,5 @@
 import PDFDocument from 'pdfkit';
-import path from 'path';
-import fs from 'fs';
-import { fileURLToPath } from 'url';
 import QRCode from 'qrcode';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const certsDir = path.resolve(__dirname, '../../../uploads/certificates');
-
-if (!fs.existsSync(certsDir)) {
-  fs.mkdirSync(certsDir, { recursive: true });
-}
 
 export interface CertificateData {
   certificateCode: string;
@@ -25,15 +14,7 @@ export interface CertificateData {
   verifyUrl: string;
 }
 
-export async function generateCertificatePDF(data: CertificateData): Promise<{
-  fileName: string;
-  filePath: string;
-  pdfUrl: string;
-}> {
-  const fileName = `certificate-${data.certificateCode}.pdf`;
-  const filePath = path.join(certsDir, fileName);
-  const pdfUrl = `/uploads/certificates/${fileName}`;
-
+export async function generateCertificatePDF(data: CertificateData): Promise<Buffer> {
   // Generate verification QR code image buffer
   const qrBuffer = await QRCode.toBuffer(data.verifyUrl, {
     width: 120,
@@ -52,8 +33,10 @@ export async function generateCertificatePDF(data: CertificateData): Promise<{
       margin: 40,
     });
 
-    const stream = fs.createWriteStream(filePath);
-    doc.pipe(stream);
+    const chunks: Buffer[] = [];
+    doc.on('data', (chunk: Buffer) => chunks.push(chunk));
+    doc.on('end', () => resolve(Buffer.concat(chunks)));
+    doc.on('error', reject);
 
     const width = 841.89;
     const height = 595.28;
@@ -200,13 +183,5 @@ export async function generateCertificatePDF(data: CertificateData): Promise<{
       .text('Scan QR to verify authenticity', width - 250, footerY + 124, { width: 155, align: 'center' });
 
     doc.end();
-
-    stream.on('finish', () => {
-      resolve({ fileName, filePath, pdfUrl });
-    });
-
-    stream.on('error', (err) => {
-      reject(err);
-    });
   });
 }

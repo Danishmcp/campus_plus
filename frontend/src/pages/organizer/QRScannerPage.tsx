@@ -123,7 +123,8 @@ export const QRScannerPage: React.FC = () => {
   }, [activeTab]);
 
   const handleDownloadCSV = () => {
-    window.open(`/api/v1/attendance/event/${eventId}/export`, '_blank');
+    const apiBase = (import.meta.env.VITE_API_URL || '').replace(/\/$/, '');
+    window.open(`${apiBase}/api/v1/attendance/event/${eventId}/export`, '_blank');
   };
 
   return (

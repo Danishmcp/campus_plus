@@ -59,19 +59,8 @@ export class CertificateService {
       const certCode = `CERT-${event.title.slice(0, 3).toUpperCase()}-${crypto.randomBytes(3).toString('hex').toUpperCase()}`;
       const verifyUrl = `${env.FRONTEND_URL}/verify/${certCode}`;
 
-      // Generate PDF file
-      const { pdfUrl } = await generateCertificatePDF({
-        certificateCode: certCode,
-        studentName: attendee.user.name,
-        studentRollNumber: attendee.user.rollNumber,
-        department: attendee.user.department,
-        eventTitle: event.title,
-        clubName: event.club.name,
-        eventDate: new Date(event.startDateTime),
-        issueDate: new Date(),
-        issuerName: issuer?.name || 'Club Lead',
-        verifyUrl,
-      });
+      // Streamable PDF URL (no disk writes)
+      const pdfUrl = `/api/v1/certificates/download/${certCode}`;
 
       // Generate verification QR image data url
       const verificationQrUrl = await generateQRDataURL(verifyUrl);
@@ -171,6 +160,42 @@ export class CertificateService {
         issuedBy: { select: { name: true } },
       },
     });
+  }
+
+  async downloadCertificatePDF(certificateCode: string): Promise<Buffer> {
+    const cert = await prisma.certificate.findUnique({
+      where: { certificateCode: certificateCode.trim().toUpperCase() },
+      include: {
+        event: {
+          include: {
+            club: { select: { name: true } },
+          },
+        },
+        user: true,
+        issuedBy: { select: { name: true } },
+      },
+    });
+
+    if (!cert) {
+      throw new NotFoundError(`Certificate '${certificateCode}' not found.`);
+    }
+
+    const verifyUrl = `${env.FRONTEND_URL}/verify/${cert.certificateCode}`;
+
+    const pdfBuffer = await generateCertificatePDF({
+      certificateCode: cert.certificateCode,
+      studentName: cert.user.name,
+      studentRollNumber: cert.user.rollNumber,
+      department: cert.user.department,
+      eventTitle: cert.event.title,
+      clubName: cert.event.club.name,
+      eventDate: new Date(cert.event.startDateTime),
+      issueDate: new Date(cert.issueDate),
+      issuerName: cert.issuedBy?.name || 'Club Lead',
+      verifyUrl,
+    });
+
+    return pdfBuffer;
   }
 }
 

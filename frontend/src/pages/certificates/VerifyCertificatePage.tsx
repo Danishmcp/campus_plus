@@ -169,7 +169,7 @@ export const VerifyCertificatePage: React.FC = () => {
           {cert.pdfUrl && (
             <div className="pt-4 border-t border-slate-100 flex justify-end">
               <a
-                href={cert.pdfUrl}
+                href={cert.pdfUrl.startsWith('http') ? cert.pdfUrl : `${(import.meta.env.VITE_API_URL || '').replace(/\/$/, '')}${cert.pdfUrl}`}
                 target="_blank"
                 rel="noreferrer"
                 className="px-5 py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-semibold text-xs rounded-xl shadow-xs transition-colors flex items-center gap-2"

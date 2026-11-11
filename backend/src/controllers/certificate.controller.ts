@@ -44,6 +44,21 @@ export class CertificateController {
       next(error);
     }
   }
+
+  async download(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { code } = req.params;
+      const pdfBuffer = await certificateService.downloadCertificatePDF(code);
+      res.set({
+        'Content-Type': 'application/pdf',
+        'Content-Disposition': `attachment; filename="certificate-${code}.pdf"`,
+        'Content-Length': pdfBuffer.length.toString(),
+      });
+      res.send(pdfBuffer);
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 export const certificateController = new CertificateController();

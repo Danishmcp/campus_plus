@@ -48,9 +48,9 @@ export class EventController {
   async createEvent(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
     try {
       const input = req.body as CreateEventInput;
-      // If banner file was uploaded via Multer
+      // If banner file was uploaded via Multer (in-memory buffer converted to data URL)
       if (req.file) {
-        input.bannerUrl = `/uploads/${req.file.filename}`;
+        input.bannerUrl = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
       }
 
       const event = await eventService.createEvent(
@@ -74,7 +74,7 @@ export class EventController {
       const { id } = req.params;
       const input = req.body as UpdateEventInput;
       if (req.file) {
-        input.bannerUrl = `/uploads/${req.file.filename}`;
+        input.bannerUrl = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
       }
 
       const event = await eventService.updateEvent(

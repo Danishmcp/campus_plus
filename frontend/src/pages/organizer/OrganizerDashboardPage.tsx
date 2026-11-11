@@ -216,7 +216,7 @@ export const OrganizerDashboardPage: React.FC = () => {
                           )}
 
                           <a
-                            href={`/api/v1/attendance/event/${evt.id}/export`}
+                            href={`${(import.meta.env.VITE_API_URL || '').replace(/\/$/, '')}/api/v1/attendance/event/${evt.id}/export`}
                             target="_blank"
                             rel="noreferrer"
                             className="px-3 py-1.5 bg-white hover:bg-slate-100 text-slate-700 font-semibold text-xs rounded-lg border border-slate-200 transition-colors flex items-center gap-1"
