@@ -1,0 +1,11 @@
+{
+  "name": "college-event-and-club-management-portal",
+  "version": "1.0.0",
+  "description": "Full Stack College Event and Club Management Portal",
+  "scripts": {
+    "dev:backend": "npm --prefix backend run dev",
+    "dev:frontend": "npm --prefix frontend run dev",
+    "build": "npm --prefix backend run build && npm --prefix frontend run build",
+    "test": "npm --prefix backend test"
+  }
+}
